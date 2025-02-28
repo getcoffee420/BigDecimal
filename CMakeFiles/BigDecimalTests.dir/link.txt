@@ -1,0 +1,1 @@
+/usr/bin/c++ CMakeFiles/BigDecimalTests.dir/src/BigDecimal.cpp.o CMakeFiles/BigDecimalTests.dir/src/operations.cpp.o CMakeFiles/BigDecimalTests.dir/tests/tests_BigDecimal.cpp.o -o BigDecimalTests  lib/libgtest.a lib/libgtest_main.a -lpthread lib/libgtest.a 

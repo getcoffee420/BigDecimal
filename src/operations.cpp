@@ -82,11 +82,11 @@ std::vector<bool> toBin(std::vector<int> number) {
     }
 
     while (!(number.size() == 1 && number[0] == 0)) {
-        result.push_back(number[0] % 2); // Берем младший бит
-        divideByTwo(number); // Делим число на 2
+        result.push_back(number[0] % 2);
+        divideByTwo(number);
     }
 
-    std::reverse(result.begin(), result.end()); // Переворачиваем порядок битов
+    std::reverse(result.begin(), result.end());
     return result;
 }
 

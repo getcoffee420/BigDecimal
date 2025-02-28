@@ -233,7 +233,6 @@ int BigDecimal::moduleCompare(const BigDecimal &l, const BigDecimal &r) {
         return 0;
 }
 
-
 std::ostream& operator<<(std::ostream& os, const BigDecimal& num) {
     if(num.sign == false) os << '-';
 

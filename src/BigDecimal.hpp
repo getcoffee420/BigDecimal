@@ -3,13 +3,10 @@
 //
 #ifndef BIGDECIMAL_HPP
 #define BIGDECIMAL_HPP
-
 #pragma once
-
 #include <vector>
 #include <string>
 #include <iostream>
-#pragma once
 class BigDecimal {
 public:
 	std::vector<bool> integer;
@@ -34,8 +31,12 @@ public:
 	BigDecimal operator+(const BigDecimal& other) const;
 	BigDecimal operator-(const BigDecimal& other) const;
 	BigDecimal operator-() const;
-	BigDecimal& operator=(const BigDecimal& other) = default;
 
+	// BigDecimal operator*(const BigDecimal& other) const;
+	// BigDecimal operator/(const BigDecimal& other) const;
+	
+	BigDecimal& operator=(const BigDecimal& other) = default;
+	
 	friend std::ostream& operator<<(std::ostream& os, const BigDecimal& num);
 
 private:

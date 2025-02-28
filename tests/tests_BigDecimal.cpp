@@ -3,7 +3,26 @@
 //
 #include "../src/BigDecimal.hpp"
 #include <catch2/catch_test_macros.hpp>
+
 #include <cstdint>
+
+TEST_CASE("equals", "[operator==]") {
+	BigDecimal a = BigDecimal::Create("123.01", 15);
+	BigDecimal b = BigDecimal::Create("123.01", 15);
+	REQUIRE(a == b);
+}
+
+TEST_CASE("comparison different sign", "[operator<=>]") {
+	BigDecimal a = 123.25_longnum;
+	BigDecimal b = -44.5_longnum;
+	REQUIRE(a > b && b < a && a >= b && b <= a && a != b);
+}
+
+TEST_CASE("comparison same sign", "[operator<=>]") {
+	BigDecimal a = 123.25_longnum;
+	BigDecimal b = 44.5_longnum;
+	REQUIRE(a > b && b < a && a >= b && b <= a && a != b);
+}
 
 TEST_CASE("+ casual", "[operator+]") {
 	BigDecimal a = BigDecimal::Create("12345", 0);
@@ -19,9 +38,8 @@ TEST_CASE("+ different signs", "[operator+]") {
 	REQUIRE(result == BigDecimal::Create("-55545", 0));
 }
 
-TEST_CASE("- casual", "[operator-]") {
-	BigDecimal a = BigDecimal::Create("50.123", 15);
-	BigDecimal b = BigDecimal::Create("40.02", 15);
-	BigDecimal result = a + b;
-	REQUIRE(result == BigDecimal::Create("10.", 0));
+TEST_CASE("_longnum is equal to Create", "[_longnum]") {
+	BigDecimal a = 12.25_longnum;
+	BigDecimal b = BigDecimal::Create("12.25", 2);
+	REQUIRE(a == b);
 }

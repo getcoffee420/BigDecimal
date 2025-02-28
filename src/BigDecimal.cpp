@@ -1,6 +1,7 @@
 #include "BigDecimal.hpp"
 #include "./operations.hpp"
 #include <algorithm>
+#include <cmath>
 
 BigDecimal::BigDecimal() {
     integer.resize(0);
@@ -14,6 +15,30 @@ BigDecimal::BigDecimal(const BigDecimal &other) {
     fraction = other.fraction;
     sign = other.sign;
     accuracy = other.accuracy;
+}
+
+BigDecimal::BigDecimal(long double value, int accuracy) {
+    this->accuracy = accuracy;
+    this->sign = value >= 0;
+    if(value < 0) value = -value;
+    int a = std::floor(value);
+    value -= std::floor(value);
+    std::vector <bool> digits;
+    while (a > 0) {
+        digits.push_back(a % 2);
+        a /= 2;
+    }
+    this->integer = digits;
+
+    std::vector <bool> fracDigits;
+    this->fraction.resize(0);
+    for(int i = 0; i < accuracy; i++) {
+        value *= 2;
+        fracDigits.push_back(value >= 1);
+        if(value >= 1) value -= 1;
+    }
+    std::reverse(fracDigits.begin(), fracDigits.end());
+    this->fraction = fracDigits;
 }
 
 BigDecimal BigDecimal::CreateFromBinary(const std::string& input) {
@@ -209,6 +234,12 @@ BigDecimal BigDecimal::operator-(const BigDecimal& other) const {
 
     return result;
 }
+
+BigDecimal operator""_longnum(long double number) {
+    return BigDecimal(number, 64);
+}
+
+
 
 int BigDecimal::moduleCompare(const BigDecimal &l, const BigDecimal &r) {
         if(l.integer.size() != r.integer.size()) {

@@ -17,11 +17,10 @@ add_executable(BigDecimal main.cpp src/BigDecimal.cpp src/operations.cpp)
 
 
 # Тесты
-add_executable(BigDecimalTests tests/tests_BigDecimal.cpp
-        tests/tests_BigDecimal.cpp)
+add_executable(BigDecimalTests tests/tests_BigDecimal.cpp)
 target_include_directories(BigDecimalTests PRIVATE src)
 target_link_libraries(BigDecimalTests PRIVATE Catch2::Catch2WithMain)
 
 include(CTest)
 enable_testing()
-add_test(NAME BigDecimalTests COMMAND tests)
+add_test(NAME BigDecimalTests COMMAND BigDecimalTests)

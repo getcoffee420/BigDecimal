@@ -4,8 +4,5 @@
 #include "./src/BigDecimal.hpp"
 
 int main(){
-	BigDecimal a;
-     std::string b;
-     std::cin >> b;
-     std::cout << BigDecimal::Create(b, 10);
+	std::cout << 2.433_longnum;
 }

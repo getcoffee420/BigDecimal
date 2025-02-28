@@ -78,7 +78,7 @@ std::vector<bool> toBin(std::vector<int> number) {
     std::vector<bool> result;
 
     if (number.size() == 1 && number[0] == 0) {
-        return {0}; // Если число 0, возвращаем {0}
+        return {0};
     }
 
     while (!(number.size() == 1 && number[0] == 0)) {

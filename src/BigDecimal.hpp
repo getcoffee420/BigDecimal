@@ -1,14 +1,15 @@
 //
 // Created by get-coffee on 2/28/25.
 //
-
 #ifndef BIGDECIMAL_HPP
 #define BIGDECIMAL_HPP
+
+#pragma once
 
 #include <vector>
 #include <string>
 #include <iostream>
-
+#pragma once
 class BigDecimal {
 public:
 	std::vector<bool> integer;
@@ -41,5 +42,4 @@ private:
 	static int moduleCompare(const BigDecimal& l, const BigDecimal& r);
 };
 
-#endif // BIGDECIMAL_HPP
-
+#endif

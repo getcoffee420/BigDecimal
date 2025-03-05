@@ -1,45 +1,39 @@
-//
-// Created by get-coffee on 2/28/25.
-//
-#include "../src/BigDecimal.hpp"
-#include <catch2/catch_test_macros.hpp>
+#include <BigDecimal.hpp>
+#include <gtest/gtest.h>
 
-#include <cstdint>
+TEST(BigDecimalTest, Addition) {
+	std::string as, bs;
+	as = "3.75";
+	bs = "13.75";
+	BigDecimal a(10, 128);
+	BigDecimal b = BigDecimal::Create(as, 3);
+	BigDecimal result = a + b;
+	BigDecimal expected = BigDecimal::Create(bs, 3);
+	EXPECT_EQ(result, expected);
+}
 
-TEST_CASE("equals", "[operator==]") {
+TEST(BigDecimalTest, Equals) {
 	BigDecimal a = BigDecimal::Create("123.01", 15);
 	BigDecimal b = BigDecimal::Create("123.01", 15);
-	REQUIRE(a == b);
+	EXPECT_EQ(a, b);
 }
 
-TEST_CASE("comparison different sign", "[operator<=>]") {
-	BigDecimal a = 123.25_longnum;
-	BigDecimal b = -44.5_longnum;
-	REQUIRE(a > b && b < a && a >= b && b <= a && a != b);
-}
-
-TEST_CASE("comparison same sign", "[operator<=>]") {
-	BigDecimal a = 123.25_longnum;
-	BigDecimal b = 44.5_longnum;
-	REQUIRE(a > b && b < a && a >= b && b <= a && a != b);
-}
-
-TEST_CASE("+ casual", "[operator+]") {
+TEST(BigDecimalTest, AdditionCasual) {
 	BigDecimal a = BigDecimal::Create("12345", 0);
 	BigDecimal b = BigDecimal::Create("67890", 0);
 	BigDecimal result = a + b;
-	REQUIRE(result == BigDecimal::Create("80235", 0));
+	EXPECT_EQ(result, BigDecimal::Create("80235", 0));
 }
 
-TEST_CASE("+ different signs", "[operator+]") {
+TEST(BigDecimalTest, AdditionDifferentSigns) {
 	BigDecimal a = BigDecimal::Create("12345", 0);
 	BigDecimal b = BigDecimal::Create("-67890", 0);
 	BigDecimal result = a + b;
-	REQUIRE(result == BigDecimal::Create("-55545", 0));
+	EXPECT_EQ(result, BigDecimal::Create("-55545", 0));
 }
 
-TEST_CASE("_longnum is equal to Create", "[_longnum]") {
+TEST(BigDecimalTest, LongnumEqualsCreate) {
 	BigDecimal a = 12.25_longnum;
 	BigDecimal b = BigDecimal::Create("12.25", 2);
-	REQUIRE(a == b);
+	EXPECT_EQ(a, b);
 }

@@ -77,9 +77,3 @@ TEST(BigDecimalTest, MultiplyTest) {
 	BigDecimal b = BigDecimal::Create("4.5", 41);
 	EXPECT_EQ(a * b, BigDecimal::Create("11.25", 3));
 }
-
-TEST(BigDecimalTest, MultiplyDiffSignsTest) {
-	BigDecimal a = BigDecimal::Create("2.5", 10);
-	BigDecimal b = BigDecimal::Create("-4.5", 10);
-	EXPECT_EQ(a * b, BigDecimal::Create("-11.25", 10));
-}

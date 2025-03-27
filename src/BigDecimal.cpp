@@ -2,12 +2,15 @@
 #include "./operations.hpp"
 #include <algorithm>
 #include <cmath>
+#include <cassert>
 
 BigDecimal::BigDecimal() {
-    integer.resize(0);
-    fraction.resize(0);
+    integer.resize(1);
+    integer[0] = 0;
+    fraction.resize(1);
+    fraction[0] = 0;
     sign = true;
-    accuracy = 0;
+    accuracy = 1;
 }
 
 BigDecimal::BigDecimal(const BigDecimal &other) {
@@ -20,22 +23,31 @@ BigDecimal::BigDecimal(const BigDecimal &other) {
 BigDecimal::BigDecimal(long double value, int accuracy) {
     this->accuracy = accuracy;
     this->sign = value >= 0;
-    if(value < 0) value = -value;
+    if (value < 0) value = -value;
+
+    if (value == 0.0) {
+        // Ноль
+        integer.resize(0);
+        fraction.resize(0);
+        return;
+    }
+
     int a = std::floor(value);
     value -= std::floor(value);
-    std::vector <bool> digits;
+
+    std::vector<bool> digits;
     while (a > 0) {
         digits.push_back(a % 2);
         a /= 2;
     }
     this->integer = digits;
 
-    std::vector <bool> fracDigits;
+    std::vector<bool> fracDigits;
     this->fraction.resize(0);
-    for(int i = 0; i < accuracy; i++) {
+    for (int i = 0; i < accuracy; i++) {
         value *= 2;
         fracDigits.push_back(value >= 1);
-        if(value >= 1) value -= 1;
+        if (value >= 1) value -= 1;
     }
     std::reverse(fracDigits.begin(), fracDigits.end());
     this->fraction = fracDigits;
@@ -82,11 +94,10 @@ BigDecimal BigDecimal::Create(const std::string& input, unsigned long accuracy) 
     result.accuracy = accuracy;
 
     int curPos = 0;
-
-    if(input[0] == '-') {
+    if (input[0] == '-') {
         result.sign = false;
         curPos = 1;
-    } else if(input[0] == '+') {
+    } else if (input[0] == '+') {
         result.sign = true;
         curPos = 1;
     } else {
@@ -94,16 +105,23 @@ BigDecimal BigDecimal::Create(const std::string& input, unsigned long accuracy) 
     }
 
     std::vector<int> digits;
-    for(; curPos < input.size(); curPos++) {
-        if(input[curPos] == '.' or input[curPos] == ',') {
+    for (; curPos < input.size(); curPos++) {
+        if (input[curPos] == '.' || input[curPos] == ',') {
             break;
         }
         digits.push_back(input[curPos] - '0');
     }
 
     std::vector<int> fractionDigits;
-    for(curPos += 1; curPos < input.size(); curPos++) {
+    for (curPos += 1; curPos < input.size() && fractionDigits.size() < accuracy; curPos++) {
         fractionDigits.push_back(input[curPos] - '0');
+    }
+
+    if (digits.empty() && fractionDigits.empty()) {
+        result.integer.resize(0);
+        result.fraction.resize(0);
+        result.sign = true;
+        return result;
     }
 
     std::reverse(fractionDigits.begin(), fractionDigits.end());
@@ -112,20 +130,25 @@ BigDecimal BigDecimal::Create(const std::string& input, unsigned long accuracy) 
     std::reverse(digits.begin(), digits.end());
     std::vector<bool> boolDigits = toBin(digits);
     result.integer.resize(boolDigits.size());
-    for(curPos = 0; curPos < boolDigits.size(); curPos++) {
-        result.integer[curPos] = boolDigits[boolDigits.size() - 1 - curPos];
+    for (size_t i = 0; i < boolDigits.size(); i++) {
+        result.integer[i] = boolDigits[boolDigits.size() - 1 - i];
     }
+
     return result;
 }
 
 int BigDecimal::operator<=>(const BigDecimal& other) const {
+  	int temp = moduleCompare(*this, other);
+    if(temp == 0) return 0;
     if(this->sign != other.sign) {
+
         if(this->sign == true) return 1;
         else return -1;
     }
     if(this->sign) {
-        return moduleCompare(*this, other);
-    } else return -1 * moduleCompare(*this, other);
+
+        return temp;
+    } else return -1 * temp;
 }
 
 bool BigDecimal::operator<(const BigDecimal& other) const {
@@ -150,6 +173,34 @@ bool BigDecimal::operator==(const BigDecimal& other) const {
 
 bool BigDecimal::operator!=(const BigDecimal& other) const {
     return operator<=>(other) != 0;
+}
+
+void BigDecimal::divideByTwoBin() {
+    if (!integer.empty()) {
+        fraction.push_back(integer[0]);
+        accuracy++;
+    }
+
+    if(integer.empty()) {
+        fraction.push_back(0);
+    }
+
+    if (!integer.empty()) {
+        std::reverse(integer.begin(), integer.end());
+        integer.pop_back();
+        std::reverse(integer.begin(), integer.end());
+    }
+}
+
+void BigDecimal::timesTwoBin() {
+    if (!fraction.empty()) {
+        integer.insert(integer.begin(), fraction.back());
+        fraction.pop_back();
+        accuracy--;
+    }
+    else {
+        integer.insert(integer.begin(), 0);
+    }
 }
 
 BigDecimal BigDecimal::operator+(const BigDecimal& other) const {
@@ -235,33 +286,76 @@ BigDecimal BigDecimal::operator-(const BigDecimal& other) const {
     return result;
 }
 
+BigDecimal BigDecimal::operator*(const BigDecimal& other) const {
+    BigDecimal result;
+
+    result.sign = (this->sign == other.sign);
+    result.accuracy = accuracy + other.accuracy;
+
+    BigDecimal temp = *this;
+    BigDecimal multiplier = other;
+
+    BigDecimal resultFraction;
+    resultFraction.sign = result.sign;
+    resultFraction.accuracy = result.accuracy;
+
+    for (size_t i = 0; i < multiplier.fraction.size(); ++i) {
+        if (multiplier.fraction[multiplier.accuracy - i]) {
+            resultFraction = resultFraction + temp;
+        }
+        temp.divideByTwoBin();
+    }
+
+    BigDecimal resultInteger;
+    resultInteger.sign = result.sign;
+
+    temp = *this;
+    for (size_t i = 0; i < multiplier.integer.size(); ++i) {
+        if (multiplier.integer[i]) {
+            resultInteger = resultInteger + temp;
+        }
+        temp.timesTwoBin();
+    }
+
+    result = resultFraction + resultInteger;
+    result.fraction.resize(result.accuracy);
+    result.sign = (this->sign == other.sign);
+    return result;
+}
+
 BigDecimal operator""_longnum(long double number) {
     return BigDecimal(number, 64);
 }
 
-
-
 int BigDecimal::moduleCompare(const BigDecimal &l, const BigDecimal &r) {
-        if(l.integer.size() != r.integer.size()) {
-            if(l.integer.size() > r.integer.size()) {
-                return 1;
-            } else return -1;
-        }
-        for(int i = l.integer.size() - 1; i >= 0; i--) {
-            if(l.integer[i] != r.integer[i]) {
-                if( l.integer[i] > r.integer[i]) {
-                    return 1;
-                } else return -1;
-            }
-        }
-        for(int i = 0; i < std::ranges::min(l.accuracy, r.accuracy); i++) {
-            if(l.fraction[l.accuracy - 1 - i] != r.fraction[r.accuracy - 1 - i]) {
-                if (l.fraction[l.accuracy-1-i] > r.fraction[r.accuracy-1-i]) {
-                    return 1;
-                } else return -1;
-            }
-        }
+    bool lIsZero = (l.integer.empty() || std::all_of(l.integer.begin(), l.integer.end(), [](bool bit) { return !bit; })) &&
+                   (l.fraction.empty() || std::all_of(l.fraction.begin(), l.fraction.end(), [](bool bit) { return !bit; }));
+    bool rIsZero = (r.integer.empty() || std::all_of(r.integer.begin(), r.integer.end(), [](bool bit) { return !bit; })) &&
+                   (r.fraction.empty() || std::all_of(r.fraction.begin(), r.fraction.end(), [](bool bit) { return !bit; }));
+
+    if (lIsZero && rIsZero) {
         return 0;
+    }
+
+    if (l.integer.size() != r.integer.size()) {
+        return l.integer.size() > r.integer.size() ? 1 : -1;
+    }
+    for (int i = static_cast<int>(l.integer.size()) - 1; i >= 0; i--) {
+        if (l.integer[i] != r.integer[i]) {
+            return l.integer[i] > r.integer[i] ? 1 : -1;
+        }
+    }
+
+    size_t maxAccuracy = std::max(l.accuracy, r.accuracy);
+    for (size_t i = 0; i < maxAccuracy; i++) {
+        bool lBit = i < l.accuracy ? l.fraction[l.accuracy - 1 - i] : false;
+        bool rBit = i < r.accuracy ? r.fraction[r.accuracy - 1 - i] : false;
+        if (lBit != rBit) {
+            return lBit > rBit ? 1 : -1;
+        }
+    }
+
+    return 0;
 }
 
 std::ostream& operator<<(std::ostream& os, const BigDecimal& num) {

@@ -29,13 +29,13 @@ public:
 	bool operator==(const BigDecimal& other) const;
 	bool operator!=(const BigDecimal& other) const;
 
+	void timesTwoBin();
+	void divideByTwoBin();
+
 	BigDecimal operator+(const BigDecimal& other) const;
 	BigDecimal operator-(const BigDecimal& other) const;
+	BigDecimal operator*(const BigDecimal& other) const;
 	BigDecimal operator-() const;
-
-
-
-	// BigDecimal operator*(const BigDecimal& other) const;
 	// BigDecimal operator/(const BigDecimal& other) const;
 
 	BigDecimal& operator=(const BigDecimal& other) = default;

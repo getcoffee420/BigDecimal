@@ -128,3 +128,4 @@ std::vector<bool> toBinFraction(std::vector<int> decFrac, const unsigned long ac
     std::reverse(result.begin(), result.end());
     return result;
 }
+
